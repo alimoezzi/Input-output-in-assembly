@@ -1,6 +1,7 @@
 global _start
 section .data ;uninitialized data
-inp_buf resb 2 ;reserves 5 bytes
+inp_buf resb 30 ;reserves 2 bytes
+out_buf resb 4 ;reserves 2 bytes
 msg1 db "You entered: "
 len1 equ $ - msg1
 msg2 db "Please enter x,y",0xa
@@ -13,14 +14,17 @@ mov ebp,esp ;initializing the stack
 push len2
 push msg2 ;passing arg to the stack
 call write
-push 2 ;length
+push 30 ;length
 push inp_buf ;buffer
 call read
-push 2
+push 30
 push inp_buf
-call write
+call atoi ;stores res in eax
+push eax
+push out_buf
+call itoa
 mov eax,1 ;sys_exit system calls
-mov ebx,0 ;exit status is 0
+; mov ebx,0 ;exit status is 0
 int 0x80
 
 read:
@@ -29,10 +33,10 @@ mov ebp,esp
 mov ecx,[ebp+8]
 mov edx,[ebp+12]
 mov eax, 3 ;sys_read system calls
-mov ebx, 0 ;stdout file descriptor
+mov ebx, 0 ;stdin file descriptor
 int 0x80
-; mov ecx, inp_buf ;pointer to the first element
-; mov edx, 5;get a five byte num
+dec eax ;actual length of chars read is in eaxs
+mov byte [eax+ecx],0
 mov esp,ebp
 pop ebp
 ret
@@ -49,3 +53,55 @@ int 0x80
 mov esp,ebp ;function epilogue
 pop ebp
 ret
+
+atoi:
+push ebp
+mov ebp,esp ;function prologue
+mov ecx,[esp+12] ;count of characters
+mov edx,[esp+8] ;the address is in the esp+8
+xor eax, eax ;stores result
+xor ebx, ebx ;stores character
+atoi_start:
+mov bl, [edx] ;get character
+cmp bl, 0 ;till null terminator
+je end_atoi
+imul eax,10 ;multiplu by 10
+sub bl, 30h ;ascii to int
+add eax, ebx ;and add the new digit
+inc edx ;;next char
+jmp atoi_start
+end_atoi:
+mov ebx,eax
+mov esp,ebp ;function epilogue
+pop ebp
+ret
+
+
+itoa:
+push ebp
+mov ebp,esp ;function prologue
+mov ecx,[esp+12] ;integer to be converted
+mov edx,[esp+8] ;the address is in the esp+8
+mov 
+; mov ebx, 0xCCCCCCCD
+; xor rdi, rdi
+; .loop:
+; mov ecx, eax; save original number
+
+; mul ebx; divide by 10 using agner fog's 'magic number'
+; shr edx, 3 ;
+
+; mov eax, edx; store quotient for next loop
+
+; lea edx, [edx*4 + edx]; multiply by 10
+; shl rdi, 8; make room for byte
+; lea edx, [edx*2 - '0']; finish *10 and convert to ascii
+; sub ecx, edx; subtract from original number to get remainder
+
+; lea rdi, [rdi + rcx]; store next byte
+
+; test eax, eax
+; jnz .loop
+mov esp,ebp ;function epilogue
+pop ebp
+ret 
