@@ -1,11 +1,12 @@
 global _start
 section .data ;uninitialized data
 inp_buf resb 30 ;reserves 2 bytes
-out_buf resb 4 ;reserves 2 bytes
+out_buf resb 30 ;reserves 2 bytes
 msg1 db "You entered: "
 len1 equ $ - msg1
 msg2 db "Please enter x,y",0xa
 len2 equ $ - msg2
+integer_counter db 5
 
 
 
@@ -23,8 +24,11 @@ call atoi ;stores res in eax
 push eax
 push out_buf
 call itoa
+push 30
+push out_buf
+call write
 mov eax,1 ;sys_exit system calls
-; mov ebx,0 ;exit status is 0
+mov ebx,0 ;exit status is 0
 int 0x80
 
 read:
@@ -80,28 +84,36 @@ ret
 itoa:
 push ebp
 mov ebp,esp ;function prologue
-mov ecx,[esp+12] ;integer to be converted
+mov cx,[esp+12] ;integer to be converted
 mov edx,[esp+8] ;the address is in the esp+8
-mov 
-; mov ebx, 0xCCCCCCCD
-; xor rdi, rdi
-; .loop:
-; mov ecx, eax; save original number
-
-; mul ebx; divide by 10 using agner fog's 'magic number'
-; shr edx, 3 ;
-
-; mov eax, edx; store quotient for next loop
-
-; lea edx, [edx*4 + edx]; multiply by 10
-; shl rdi, 8; make room for byte
-; lea edx, [edx*2 - '0']; finish *10 and convert to ascii
-; sub ecx, edx; subtract from original number to get remainder
-
-; lea rdi, [rdi + rcx]; store next byte
-
-; test eax, eax
-; jnz .loop
+xor eax,eax
+mov al,[integer_counter]
+cbw
+cwde
+mov byte [edx+eax+1],0
+push edx ;stroring the output buffer addr.
+_loop:
+push eax ; store the cursor position
+xor eax,eax
+mov ax,cx
+cdq
+mov ebx,10
+idiv ebx
+mov cx,ax
+cmp byte al,0
+je endloop
+add edx,48
+pop eax ; get back the cursor
+pop ebx
+mov [ebx+eax],dl
+dec eax
+push ebx
+jmp _loop
+endloop:
+add edx,48
+pop eax ; get back the cursor
+pop ebx
+mov [ebx+eax],dl
 mov esp,ebp ;function epilogue
 pop ebp
 ret 
