@@ -84,7 +84,7 @@ ret
 itoa:
 push ebp
 mov ebp,esp ;function prologue
-mov cx,[esp+12] ;integer to be converted
+mov ecx,[esp+12] ;integer to be converted
 mov edx,[esp+8] ;the address is in the esp+8
 xor eax,eax
 mov al,[integer_counter]
@@ -95,11 +95,11 @@ push edx ;stroring the output buffer addr.
 _loop:
 push eax ; store the cursor position
 xor eax,eax
-mov ax,cx
+mov eax,ecx
 cdq
 mov ebx,10
 idiv ebx
-mov cx,ax
+mov ecx,eax
 cmp byte al,0
 je endloop
 add edx,48
