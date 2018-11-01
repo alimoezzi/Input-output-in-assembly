@@ -39,8 +39,10 @@ mov edx,[ebp+12]
 mov eax, 3 ;sys_read system calls
 mov ebx, 0 ;stdin file descriptor
 int 0x80
-dec eax ;actual length of chars read is in eaxs
-mov byte [eax+ecx],0
+dec eax ;actual length of chars read is in eax
+lea edi,[ecx+eax] ;edi is the start of the buffer.
+xor eax,eax ;fill the buffer with zeros.    
+stosb ;store string with 10000 dwords = 40000 bytes.
 mov esp,ebp
 pop ebp
 ret
