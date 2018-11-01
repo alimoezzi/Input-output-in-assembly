@@ -28,7 +28,7 @@ push 30
 push out_buf
 call write
 mov eax,1 ;sys_exit system calls
-; mov ebx,0 ;exit status is 0
+mov ebx,0 ;exit status is 0
 int 0x80
 
 read:
@@ -40,7 +40,7 @@ pushad
 lea edi,[ecx] ;edi is the start of the buffer.
 mov ecx,edx ;putting count in ecx for rep
 xor eax,eax ;fill the buffer with zeros.    
-rep stosb ;store string with 10000 dwords = 40000 bytes.
+rep stosb ;store string with ecx dwords = 4*ecx bytes.
 popad
 mov eax, 3 ;sys_read system calls
 mov ebx, 0 ;stdin file descriptor
@@ -48,7 +48,7 @@ int 0x80
 dec eax ;actual length of chars read is in eax
 lea edi,[ecx+eax] ;edi is the start of the buffer.
 xor eax,eax ;fill the buffer with zeros.    
-stosb ;store string with 10000 dwords = 40000 bytes.
+stosb 
 mov esp,ebp
 pop ebp
 ret
@@ -107,6 +107,10 @@ push ebp
 mov ebp,esp ;function prologue
 mov ecx,[esp+12] ;integer to be converted
 mov edx,[esp+8] ;the address is in the esp+8
+push ecx
+cmp ecx,0
+jl neg_itoa_mani
+_itoa_start:
 xor eax,eax
 mov al,[integer_counter]
 cbw
@@ -135,6 +139,16 @@ add edx,48
 pop eax ; get back the cursor
 pop ebx
 mov [ebx+eax],dl
+jmp itoa_end
+neg_itoa_mani:
+neg ecx
+jmp _itoa_start
+itoa_end:
+pop ecx
+cmp ecx,0
+jnl itoa_finish
+mov byte[ebx+eax-1],"-"
+itoa_finish:
 mov esp,ebp ;function epilogue
 pop ebp
 ret 
