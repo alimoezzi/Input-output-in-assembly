@@ -36,6 +36,12 @@ push ebp ;function Prologue
 mov ebp,esp
 mov ecx,[ebp+8]
 mov edx,[ebp+12]
+pushad
+lea edi,[ecx] ;edi is the start of the buffer.
+mov ecx,edx ;putting count in ecx for rep
+xor eax,eax ;fill the buffer with zeros.    
+rep stosb ;store string with 10000 dwords = 40000 bytes.
+popad
 mov eax, 3 ;sys_read system calls
 mov ebx, 0 ;stdin file descriptor
 int 0x80
