@@ -28,7 +28,7 @@ push 30
 push out_buf
 call write
 mov eax,1 ;sys_exit system calls
-mov ebx,0 ;exit status is 0
+; mov ebx,0 ;exit status is 0
 int 0x80
 
 read:
@@ -73,6 +73,9 @@ mov ecx,[esp+12] ;count of characters
 mov edx,[esp+8] ;the address is in the esp+8
 xor eax, eax ;stores result
 xor ebx, ebx ;stores character
+push edx
+cmp byte[edx],"-"
+je neg_manipulation
 atoi_start:
 mov bl, [edx] ;get character
 cmp bl, 0 ;till null terminator
@@ -82,7 +85,17 @@ sub bl, 30h ;ascii to int
 add eax, ebx ;and add the new digit
 inc edx ;;next char
 jmp atoi_start
+neg_manipulation:
+inc edx
+jmp atoi_start
 end_atoi:
+pop edx
+cmp byte[edx],"-"
+je twos_com
+jne finish_atoi
+twos_com:
+neg eax
+finish_atoi:
 mov ebx,eax
 mov esp,ebp ;function epilogue
 pop ebp
