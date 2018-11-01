@@ -1,7 +1,8 @@
 global _start
-section .data ;uninitialized data
+section .bss ;uninitialized data
 inp_buf resb 30 ;reserves 2 bytes
 out_buf resb 30 ;reserves 2 bytes
+section .data ;initialized data
 msg1 db "You entered: "
 len1 equ $ - msg1
 msg2 db "Please enter x,y",0xa
