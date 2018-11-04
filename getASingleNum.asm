@@ -2,12 +2,13 @@ global _start
 section .bss ;uninitialized data
 inp_buf resb 30 ;reserves 2 bytes
 out_buf resb 30 ;reserves 2 bytes
+out_buf_len equ 30 ;reserves 2 bytes
 section .data ;initialized data
 msg1 db "You entered: "
 len1 equ $ - msg1
 msg2 db "Please enter x,y",0xa
 len2 equ $ - msg2
-integer_counter db 5
+integer_counter db 11
 
 
 
@@ -35,6 +36,7 @@ int 0x80
 read:
 push ebp ;function Prologue
 mov ebp,esp
+pushad
 mov ecx,[ebp+8]
 mov edx,[ebp+12]
 pushad
@@ -49,7 +51,8 @@ int 0x80
 dec eax ;actual length of chars read is in eax
 lea edi,[ecx+eax] ;edi is the start of the buffer.
 xor eax,eax ;fill the buffer with zeros.    
-stosb 
+stosb
+popad 
 mov esp,ebp
 pop ebp
 ret
@@ -57,12 +60,14 @@ ret
 write:
 push ebp
 mov ebp,esp ;function prologue
-mov ecx,[esp+8] ;the arg1 is in esp+8
-mov edx,[esp+12] ;the arg2 is in esp+12
+pushad
+mov ecx,[ebp+8] ;the arg1 is in esp+8
+mov edx,[ebp+12] ;the arg2 is in esp+12
 ; mov ecx, eax ;the pointer to the first element
 mov eax, 4 ;sys_write system calls
 mov ebx, 1 ;stdout file descriptor
 int 0x80
+popad
 mov esp,ebp ;function epilogue
 pop ebp
 ret
@@ -70,8 +75,9 @@ ret
 atoi:
 push ebp
 mov ebp,esp ;function prologue
-mov ecx,[esp+12] ;count of characters
-mov edx,[esp+8] ;the address is in the esp+8
+pushad
+mov ecx,[ebp+12] ;count of characters
+mov edx,[ebp+8] ;the address is in the esp+8
 xor eax, eax ;stores result
 xor ebx, ebx ;stores character
 push edx
@@ -97,7 +103,10 @@ jne finish_atoi
 twos_com:
 neg eax
 finish_atoi:
-mov ebx,eax
+push eax ;*
+add esp,4 ;*
+popad
+mov eax,[esp-36] ;*
 mov esp,ebp ;function epilogue
 pop ebp
 ret
@@ -106,8 +115,15 @@ ret
 itoa:
 push ebp
 mov ebp,esp ;function prologue
-mov ecx,[esp+12] ;integer to be converted
-mov edx,[esp+8] ;the address is in the esp+8
+pushad
+mov ecx,[ebp+12] ;integer to be converted
+mov edx,[ebp+8] ;the address is in the esp+8
+pushad
+lea edi,[edx] ;edi is the start of the buffer.
+mov ecx,out_buf_len ;putting count in ecx for rep
+xor eax,eax ;fill the buffer with zeros.    
+rep stosb ;store string with ecx dwords = 4*ecx bytes.
+popad
 push ecx
 cmp ecx,0
 jl neg_itoa_mani
@@ -150,6 +166,7 @@ cmp ecx,0
 jnl itoa_finish
 mov byte[ebx+eax-1],"-"
 itoa_finish:
+popad
 mov esp,ebp ;function epilogue
 pop ebp
 ret 
