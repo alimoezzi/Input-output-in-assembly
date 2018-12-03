@@ -55,7 +55,7 @@ stosb
 popad 
 mov esp,ebp
 pop ebp
-ret
+ret 8
 
 write:
 push ebp
@@ -70,7 +70,7 @@ int 0x80
 popad
 mov esp,ebp ;function epilogue
 pop ebp
-ret
+ret 8
 
 atoi:
 push ebp
@@ -109,7 +109,7 @@ popad
 mov eax,[esp-36] ;*
 mov esp,ebp ;function epilogue
 pop ebp
-ret
+ret 8
 
 
 itoa:
@@ -169,4 +169,4 @@ itoa_finish:
 popad
 mov esp,ebp ;function epilogue
 pop ebp
-ret 
+ret 8
