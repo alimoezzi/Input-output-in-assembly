@@ -160,9 +160,10 @@ sub eax,edx
 mov ebx,1
 xor edx,-2
 and edx,1
+dec edx
 _lngth_start:
 cmp ebx,eax
-jge _lngth_end
+jg _lngth_end
 cmp edx,maxlen
 jge _lngth_end
 inc edx
@@ -174,9 +175,11 @@ add ebx,eax
 pop eax
 jmp _lngth_start
 _lngth_end:
-; dec edx
 mov [integer_counter],edx
 popad
+cmp ecx,-2000000000
+jle _lngth_special
+_lngth_special_con:
 ;
 push ecx
 cmp ecx,0
@@ -224,3 +227,6 @@ popad
 mov esp,ebp ;function epilogue
 pop ebp
 ret 8
+_lngth_special:
+inc byte[integer_counter]
+jmp _lngth_special_con
