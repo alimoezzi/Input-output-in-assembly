@@ -158,6 +158,8 @@ cdq ;abs
 xor eax,edx
 sub eax,edx
 mov ebx,1
+cmp eax,0
+je _lngth_end
 xor edx,-2
 and edx,1
 dec edx
