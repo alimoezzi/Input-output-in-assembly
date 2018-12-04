@@ -1,2 +1,2 @@
 # Input-output-in-assembly
-### This is a set of funcution for reading and writing text and numeric data from the console
+### Getting input from console and writing to it is a requirement of any assembly course. This project aims to provide these functions for different processors and operating system.
